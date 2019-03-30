@@ -22,6 +22,16 @@ class TestToken(TestCase):
         result = json.loads(validate(event, ''))
         self.assertTrue(result.get('statusCode') == 401)
 
+    def test_validate_bad_parameters(self):
+        event = {
+            "key1": "value1",
+            "key2": "value2",
+            "key3": "value3"
+        }
+
+        result = json.loads(validate(event, ''))
+        self.assertTrue(result.get('statusCode') == 401)
+
     def test_access_token_invalid(self):
         with mock.patch.dict('os.environ', {'SECRET_KEY': '123456789'}):
             print(os.environ)

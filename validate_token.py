@@ -14,9 +14,9 @@ class AuthenticationResponse(json.JSONEncoder):
         self.statusCode = statusCode
         self.token = token
         self.message = message
-    
+
     def default(self, instance):
-        if  isinstance(instance, AuthenticationResponse):
+        if isinstance(instance, AuthenticationResponse):
             return {
                 'statusCode': instance.statusCode,
                 'token': instance.token,
@@ -25,9 +25,6 @@ class AuthenticationResponse(json.JSONEncoder):
         else:
             return json.JSONEncoder.default(self, instance)
 
-
-class TestEncoder(json.JSONEncoder):
-    pass
 
 def validate(event, context):
     try:
@@ -50,7 +47,7 @@ def validate(event, context):
         if response is None:
             response = AuthenticationResponse(
                 statusCode=status_codes.get('unauthorized')
-            ), 
+            )
         return json.dumps(response, default=response.default)
 
 
