@@ -1,12 +1,16 @@
 import json
 import os
 import jwt
+import logging
 
 
 status_codes = {
     'success': 200,
     'unauthorized': 401,
 }
+
+logger = logging.getLogger()
+logger.setLevel(logging.INFO)
 
 
 class AuthenticationResponse(json.JSONEncoder):
@@ -28,6 +32,7 @@ class AuthenticationResponse(json.JSONEncoder):
 
 def validate(event, context):
     try:
+        logging.info(f'Received event {event} context {context}')
         response = None
         if event.get('access_token'):
             response = AuthenticationResponse(
@@ -39,7 +44,8 @@ def validate(event, context):
                 statusCode=status_codes.get('success'),
                 token=validate_token(event.get('refresh_token'))
             )
-    except:
+    except Exception as err:
+        logging.error(err, exc_info=True)
         response = AuthenticationResponse(
             statusCode=status_codes.get('unauthorized')
         )
