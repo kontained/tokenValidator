@@ -17,16 +17,22 @@ class TestToken(TestCase):
 
     def test_access_token_not_jwt(self):
         event = {
-            'access_token': '123'
+            'headers': {
+                'Accept': '*/*',
+                'accept-encoding': 'gzip, deflate',
+                'Authorization': 'Bearer 123'
+            }
         }
+
         result = json.loads(validate(event, ''))
         self.assertTrue(result.get('statusCode') == 401)
 
-    def test_validate_bad_parameters(self):
+    def test_validate_no_authorization_header(self):
         event = {
-            "key1": "value1",
-            "key2": "value2",
-            "key3": "value3"
+            'headers': {
+                'Accept': '*/*',
+                'accept-encoding': 'gzip, deflate',
+            }
         }
 
         result = json.loads(validate(event, ''))
@@ -34,7 +40,6 @@ class TestToken(TestCase):
 
     def test_access_token_invalid(self):
         with mock.patch.dict('os.environ', {'SECRET_KEY': '123456789'}):
-            print(os.environ)
             payload = {
                 'exp': datetime.utcnow() + timedelta(days=1),
                 'iat': datetime.utcnow(),
@@ -56,7 +61,6 @@ class TestToken(TestCase):
 
     def test_access_token_valid(self):
         with mock.patch.dict('os.environ', {'SECRET_KEY': '123456789'}):
-            print(os.environ)
             payload = {
                 'exp': datetime.utcnow() + timedelta(days=1),
                 'iat': datetime.utcnow(),
@@ -70,7 +74,11 @@ class TestToken(TestCase):
             )
 
             event = {
-                'access_token': token
+                'headers': {
+                    'Accept': '*/*',
+                    'accept-encoding': 'gzip, deflate',
+                    'Authorization': 'Bearer ' + token.decode()
+                }
             }
 
             result = json.loads(validate(event, ''))

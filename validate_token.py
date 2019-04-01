@@ -32,17 +32,14 @@ class AuthenticationResponse(json.JSONEncoder):
 
 def validate(event, context):
     try:
-        logging.info(f'Received event {event} context {context}')
+        logging.info(f'Received event: {event} context: {context}')
         response = None
-        if event.get('access_token'):
+        token = event.get('headers').get('Authorization')[7:]
+
+        if token:
             response = AuthenticationResponse(
                 statusCode=status_codes.get('success'),
-                token=validate_token(event.get('access_token'))
-            )
-        elif event.get('refresh_token'):
-            response = AuthenticationResponse(
-                statusCode=status_codes.get('success'),
-                token=validate_token(event.get('refresh_token'))
+                token=validate_token(token)
             )
     except Exception as err:
         logging.error(err, exc_info=True)
@@ -54,7 +51,9 @@ def validate(event, context):
             response = AuthenticationResponse(
                 statusCode=status_codes.get('unauthorized')
             )
-        return json.dumps(response, default=response.default)
+        result = json.dumps(response, default=response.default)
+        logging.info(f'Response: {result}')
+        return result
 
 
 def validate_token(token):
